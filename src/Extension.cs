@@ -26,7 +26,7 @@ public static class SocketExtensions
         await s.SendAsync(responseBytes, SocketFlags.None);
     }
 
-    public static async Task<HttpResponseMessage> HandleRequest(this Socket socket, Request request)
+    public static HttpResponseMessage HandleRequest(this Socket socket, Request request)
     {
         //Prepare response
         HttpResponseMessage response;

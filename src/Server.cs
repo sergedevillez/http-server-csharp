@@ -32,9 +32,9 @@ static async Task HandleClient(Socket socket)
     Console.WriteLine($"Request:\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
 
     //Handle the request
-    var response = await socket.HandleRequest(req);
+    var response = socket.HandleRequest(req);
 
     await socket.SendAsync(response);
-
+    await Task.Delay(1000);
     socket.Close();
 }
