@@ -26,17 +26,21 @@ while (true)
 
     Console.WriteLine($"Request:\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
 
-    switch (req.Path)
+    if (req.Path.Equals("/"))
     {
-        case "/":
-            await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\nYou called the root path");
-            break;
-        // case "/index.html":
-        //     await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\nYou called the index.html path");
-        //     break;
-        default:
-            await socket.SendAsync("HTTP/1.1 404 NOTFOUND\r\n\r\nPath not found");
-            break;
+        await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\nYou called the root path");
+    }
+    else if (req.Path.Equals("/index.html"))
+    {
+        await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\nYou called the index.html path");
+    }
+    else if (req.Path.Contains("/echo/"))
+    {
+        await socket.SendAsync($"HTTP/1.1 200 OK\r\n\r\n{req.Path.Replace("/echo/", "")}");
+    }
+    else
+    {
+        await socket.SendAsync("HTTP/1.1 404 NOTFOUND\r\n\r\nPath not found");
     }
 }
 
