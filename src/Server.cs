@@ -26,57 +26,10 @@ while (true)
 
     Console.WriteLine($"Request:\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
 
-    //PATH "/"
-    if (req.Path.Equals("/"))
-    {
-        Console.WriteLine("Root path called");
-        HttpResponseMessage response = new(HttpStatusCode.OK)
-        {
-            Content = new StringContent("You called the root path"),
-            StatusCode = HttpStatusCode.OK
-        };
-        await socket.SendAsync(response);
-    }
-    //PATH "/index.html"
-    else if (req.Path.Equals("/index.html"))
-    {
-        Console.WriteLine("Index page called");
-        HttpResponseMessage response = new(HttpStatusCode.OK)
-        {
-            Content = new StringContent("This is the index page")
-        };
-        await socket.SendAsync(response);
-    }
-    //PATH "/echo/{message}"
-    else if (req.Path.Contains("/echo/"))
-    {
-        Console.WriteLine("Echo called. Response was: " + req.Path.Replace("/echo/", ""));
-        HttpResponseMessage response = new(HttpStatusCode.OK)
-        {
-            Content = new StringContent(req.Path.Replace("/echo/", ""), Encoding.UTF8, "text/plain"),
-        };
-        await socket.SendAsync(response);
-    }
-    //PATH /user-agent
-    else if (req.Path.Equals("/user-agent"))
-    {
-        Console.WriteLine("User agent called");
-        HttpResponseMessage response = new(HttpStatusCode.OK)
-        {
-            Content = new StringContent(req.Headers["User-Agent"]),
-        };
-        await socket.SendAsync(response);
-    }
-    //PATH others
-    else
-    {
-        Console.WriteLine("Path not found");
-        HttpResponseMessage response = new(HttpStatusCode.NotFound)
-        {
-            Content = new StringContent("Path not found")
-        };
-        await socket.SendAsync(response);
-    }
+    //Handle the request
+    var response = await socket.HandleRequest(req);
+
+    await socket.SendAsync(response);
 
     socket.Close();
 }
