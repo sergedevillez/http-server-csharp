@@ -26,64 +26,47 @@ while (true)
 
     Console.WriteLine($"Request:\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
 
+    //PATH "/"
     if (req.Path.Equals("/"))
     {
-        await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\nYou called the root path");
+        Console.WriteLine("Root path called");
+        HttpResponseMessage response = new(HttpStatusCode.OK)
+        {
+            Content = new StringContent("You called the root path"),
+            StatusCode = HttpStatusCode.OK
+        };
+        await socket.SendAsync(response);
     }
+    //PATH "/index.html"
     else if (req.Path.Equals("/index.html"))
     {
-        await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\nYou called the index.html path");
+        Console.WriteLine("Index page called");
+        HttpResponseMessage response = new(HttpStatusCode.OK)
+        {
+            Content = new StringContent("This is the index page")
+        };
+        await socket.SendAsync(response);
     }
+    //PATH "/echo/{message}"
     else if (req.Path.Contains("/echo/"))
     {
-        await socket.SendAsync($"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{req.Path.Replace("/echo/", "")}");
+        Console.WriteLine("Echo called. Response was: " + req.Path.Replace("/echo/", ""));
+        HttpResponseMessage response = new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(req.Path.Replace("/echo/", ""), Encoding.UTF8, "text/plain"),
+        };
+        await socket.SendAsync(response);
     }
+    //PATH others
     else
     {
-        await socket.SendAsync("HTTP/1.1 404 NOTFOUND\r\n\r\nPath not found");
-    }
-    socket.Close();
-}
-
-class Request
-{
-    public string Method { get; set; } = "";
-    public string Path { get; set; } = "";
-    public string Version { get; set; } = "";
-    public Dictionary<string, string> Headers { get; set; } = new();
-
-    public static Request Parse(byte[] requestBytes)
-    {
-        //Transform request to string
-        string requestString = Encoding.UTF8.GetString(requestBytes);
-        //Split request into lines
-        string[] lines = requestString.Split("\r\n");
-        //Split first line () into parts
-        string[] startLine = lines[0].Split(" ");
-        //Create new request object
-        Request request = new()
+        Console.WriteLine("Path not found");
+        HttpResponseMessage response = new(HttpStatusCode.NotFound)
         {
-            Method = startLine[0],
-            Path = startLine[1],
-            Version = startLine[2]
+            Content = new StringContent("Path not found")
         };
-
-        foreach (string line in lines.Skip(1))
-        {
-            string[] header = line.Split(": ");
-            if (header.Length == 2)
-            {
-                request.Headers.Add(header[0], header[1]);
-            }
-        }
-        return request;
+        await socket.SendAsync(response);
     }
 
-}
-
-//Unused, to be used later when reponse are more complex
-class Response
-{
-    public int StatusCode { get; set; }
-    public string StatusMessage { get; set; } = "";
+    socket.Close();
 }
