@@ -3,6 +3,17 @@ using System.Net.Sockets;
 using System.Text;
 using codecrafters_http_server_csharp;
 
+
+
+var argsList = args.ToList();
+string filesDirectory;
+if (argsList.Contains("--directory"))
+{
+    int directoryIndex = argsList.IndexOf("--directory");
+    var filesDirectoryArgument = argsList[directoryIndex + 1];
+    filesDirectory = !string.IsNullOrWhiteSpace(filesDirectoryArgument) ? filesDirectoryArgument : "wwwroot";
+}
+
 //Start server
 Console.WriteLine("Starting server...");
 TcpListener server = new(IPAddress.Any, 4221);
@@ -19,7 +30,6 @@ while (true)
 
 static async Task HandleClient(Socket socket)
 {
-    Console.WriteLine("Client connected");
     //Prepare buffer for request
     byte[] buffer = new byte[1024];
 
@@ -29,18 +39,14 @@ static async Task HandleClient(Socket socket)
     //Read request. Socket flag is ued to specify how the socket should behave
     await socket.ReceiveAsync(buffer, SocketFlags.None);
 
-    Console.WriteLine("Building request");
-
     //Parse request
     Request req = Request.Parse(buffer);
 
     Console.WriteLine($"\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
 
     //Handle the request
-    Console.WriteLine("Handling request");
-    HttpResponseMessage response = socket.HandleRequest(req);
+    HttpResponseMessage response = socket.HandleRequest(req, filesDirectory);
 
-    Console.WriteLine("Sending response");
     await socket.SendAsync(response);
     socket.Close();
 }
