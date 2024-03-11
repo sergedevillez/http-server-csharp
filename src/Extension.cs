@@ -79,7 +79,11 @@ public static class SocketExtensions
             }
             else
             {
-                response = new(HttpStatusCode.OK);
+                //Get the files content into content and the content-type as application/octet-stream
+                response = new(HttpStatusCode.OK)
+                {
+                    Content = new StreamContent(File.OpenRead(filesDirectory + "/" + request.Path.Replace("/files/", "")))
+                };
             }
         }
         //PATH others
