@@ -67,6 +67,21 @@ public static class SocketExtensions
                 Content = new StringContent(request.Headers["User-Agent"]),
             };
         }
+        //PATH /files/<filename>
+        else if (request.Path.Contains("/files/"))
+        {
+            if (!File.Exists(request.Path.Replace("/files/", "")))
+            {
+                response = new(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent("File not found")
+                };
+            }
+            else
+            {
+                response = new(HttpStatusCode.OK);
+            }
+        }
         //PATH others
         else
         {
