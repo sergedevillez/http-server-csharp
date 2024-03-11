@@ -36,7 +36,7 @@ while (true)
     }
     else if (req.Path.Contains("/echo/"))
     {
-        await socket.SendAsync($"HTTP/1.1 200 OK\r\n\r\n{req.Path.Replace("/echo/", "")}");
+        await socket.SendAsync($"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{req.Path.Replace("/echo/", "")}");
     }
     else
     {
