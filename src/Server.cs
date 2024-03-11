@@ -29,13 +29,13 @@ while (true)
     switch (req.Path)
     {
         case "/":
-            await socket.SendAsync("You called the root path");
+            await socket.SendAsync("HTTP/1.1 200IK\r\n\r\nYou called the root path");
             break;
         case "/index.html":
-            await socket.SendAsync("You called the index.html path");
+            await socket.SendAsync("HTTP/1.1 200IK\r\n\r\nYou called the index.html path");
             break;
         default:
-            await socket.SendAsync("Path not found");
+            await socket.SendAsync("HTTP/1.1 404NOTFOUND\r\n\r\nPath not found");
             break;
     }
 }
