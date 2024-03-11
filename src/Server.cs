@@ -26,14 +26,18 @@ static async Task HandleClient(Socket socket)
     //Read request. Socket flag is ued to specify how the socket should behave
     await socket.ReceiveAsync(buffer, SocketFlags.None);
 
+    Console.WriteLine("Building request");
+
     //Parse request
     Request req = Request.Parse(buffer);
 
     Console.WriteLine($"\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
 
     //Handle the request
+    Console.WriteLine("Handling request");
     var response = socket.HandleRequest(req);
 
+    Console.WriteLine("Sending response");
     await socket.SendAsync(response);
     socket.Close();
 }
