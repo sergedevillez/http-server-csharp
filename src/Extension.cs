@@ -12,11 +12,12 @@ public static class SocketExtensions
         StringBuilder response = new();
         if (res.Content is not null && !string.IsNullOrEmpty(content))
         {
-            response.Append($"HTTP/1.1 {(int)res.StatusCode} {res.StatusCode}" +
-                             $"\r\nContent-Type: text/plain" +
-                             $"\r\nContent-Length: {content.Length}" +
-                             "\r\n" +
-                             $"\r\n{content}");
+            string contentType = res.Content is StreamContent ? "application/octet-stream" : "text/plain";
+            response.Append($"HTTP/1.1 {(int)res.StatusCode} {res.StatusCode}");
+            response.Append($"\r\nContent-Type: {contentType}");
+            response.Append($"\r\nContent-Length: {content.Length}");
+            response.Append("\r\n");
+            response.Append($"\r\n{content}"); ;
         }
         else
         {
