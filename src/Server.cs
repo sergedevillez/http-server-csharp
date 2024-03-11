@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using codecrafters_http_server_csharp;
 
 //Start server
 Console.WriteLine("Starting server...");
@@ -10,16 +11,74 @@ Console.WriteLine("Server started on port 4221");
 
 while (true)
 {
-    //Open socket and wait for call from client
-    var socket = server.AcceptSocket();
+    //Wait for client request
+    Socket socket = await server.AcceptSocketAsync();
+    Console.WriteLine("Client connected");
 
-    //Create response
-    var response = "HTTP/1.1 200 OK\r\n\r\n";
+    //Prepare buffer for request
+    byte[] buffer = new byte[1024];
 
-    //Prepare response as byte array
-    var dataBuffer = Encoding.UTF8.GetBytes(response);
+    //Read request. Socket flag is ued to specify how the socket should behave
+    await socket.ReceiveAsync(buffer, SocketFlags.None);
 
-    //Send response via saved socket
-    socket.Send(dataBuffer);
+    //Parse request
+    Request req = Request.Parse(buffer);
 
+    Console.WriteLine($"Request:\nMethod: {req.Method}\nPath: {req.Path}\nVersion {req.Version}");
+
+    switch (req.Path)
+    {
+        case "/":
+            await socket.SendAsync("You called the root path");
+            break;
+        case "/index.html":
+            await socket.SendAsync("You called the index.html path");
+            break;
+        default:
+            await socket.SendAsync("Path not found");
+            break;
+    }
+}
+
+class Request
+{
+    public string Method { get; set; } = null!;
+    public string Path { get; set; } = null!;
+    public string Version { get; set; } = null!;
+    public Dictionary<string, string> Headers { get; set; } = [];
+
+    public static Request Parse(byte[] requestBytes)
+    {
+        //Transform request to string
+        string requestString = Encoding.UTF8.GetString(requestBytes);
+        //Split request into lines
+        string[] lines = requestString.Split("\r\n");
+        //Split first line () into parts
+        string[] startLine = lines[0].Split(" ");
+        //Create new request object
+        Request request = new()
+        {
+            Method = startLine[0],
+            Path = startLine[1],
+            Version = startLine[2]
+        };
+
+        foreach (string line in lines.Skip(1))
+        {
+            string[] header = line.Split(": ");
+            if (header.Length == 2)
+            {
+                request.Headers.Add(header[0], header[1]);
+            }
+        }
+        return request;
+    }
+
+}
+
+//Unused, to be used later when reponse are more complex
+class Response
+{
+    public int StatusCode { get; set; }
+    public required string StatusMessage { get; set; }
 }
