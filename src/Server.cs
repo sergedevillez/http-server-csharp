@@ -13,8 +13,15 @@ while (true)
 {
     //Wait for client request
     Socket socket = await server.AcceptSocketAsync();
-    Console.WriteLine("Client connected");
 
+    Console.WriteLine("Client connected");
+    await Task.Run(() => HandleClient(socket));
+
+    socket.Close();
+}
+
+static async Task HandleClient(Socket socket)
+{
     //Prepare buffer for request
     byte[] buffer = new byte[1024];
 
@@ -30,6 +37,4 @@ while (true)
     var response = await socket.HandleRequest(req);
 
     await socket.SendAsync(response);
-
-    socket.Close();
 }
