@@ -14,7 +14,7 @@ while (true)
     //Wait for client request
     Socket socket = await server.AcceptSocketAsync();
 
-    await Task.Run(() => HandleClient(socket));
+    Task.Run(async () => await HandleClient(socket));
 }
 
 static async Task HandleClient(Socket socket)
@@ -22,6 +22,9 @@ static async Task HandleClient(Socket socket)
     Console.WriteLine("Client connected");
     //Prepare buffer for request
     byte[] buffer = new byte[1024];
+
+    //Add timeout to socket
+    socket.ReceiveTimeout = 3000;
 
     //Read request. Socket flag is ued to specify how the socket should behave
     await socket.ReceiveAsync(buffer, SocketFlags.None);
@@ -35,7 +38,7 @@ static async Task HandleClient(Socket socket)
 
     //Handle the request
     Console.WriteLine("Handling request");
-    var response = socket.HandleRequest(req);
+    HttpResponseMessage response = socket.HandleRequest(req);
 
     Console.WriteLine("Sending response");
     await socket.SendAsync(response);
