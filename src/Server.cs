@@ -57,6 +57,16 @@ while (true)
         };
         await socket.SendAsync(response);
     }
+    //PATH /user-agent
+    else if (req.Path.Equals("/user-agent"))
+    {
+        Console.WriteLine("User agent called");
+        HttpResponseMessage response = new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(req.Headers["User-Agent"]),
+        };
+        await socket.SendAsync(response);
+    }
     //PATH others
     else
     {
