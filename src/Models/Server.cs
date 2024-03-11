@@ -15,7 +15,7 @@ public class Server
     }
 
     //Need to be called to start the server
-    public async Task Start()
+    public async Task StartAsync()
     {
         _server.Start();
         while (true)
