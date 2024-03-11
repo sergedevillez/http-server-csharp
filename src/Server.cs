@@ -42,10 +42,10 @@ while (true)
 
 class Request
 {
-    public string Method { get; set; } = null!;
-    public string Path { get; set; } = null!;
-    public string Version { get; set; } = null!;
-    public Dictionary<string, string> Headers { get; set; } = [];
+    public string Method { get; set; } = "";
+    public string Path { get; set; } = "";
+    public string Version { get; set; } = "";
+    public Dictionary<string, string> Headers { get; set; } = new();
 
     public static Request Parse(byte[] requestBytes)
     {
@@ -80,5 +80,5 @@ class Request
 class Response
 {
     public int StatusCode { get; set; }
-    public required string StatusMessage { get; set; }
+    public string StatusMessage { get; set; } = "";
 }
