@@ -42,6 +42,7 @@ while (true)
     {
         await socket.SendAsync("HTTP/1.1 404 NOTFOUND\r\n\r\nPath not found");
     }
+    socket.Close();
 }
 
 class Request
