@@ -26,7 +26,7 @@ public static class SocketExtensions
         await s.SendAsync(responseBytes, SocketFlags.None);
     }
 
-    public static HttpResponseMessage HandleRequest(this Socket socket, Request request, string filesDirectory)
+    public static HttpResponseMessage HandleRequest(this Socket socket, Request request, string? filesDirectory)
     {
         //Prepare response
         HttpResponseMessage response;
@@ -70,7 +70,7 @@ public static class SocketExtensions
         //PATH /files/<filename>
         else if (request.Path.Contains("/files/"))
         {
-            if (!File.Exists("fileDirectory" + request.Path.Replace("/files/", "")))
+            if (!File.Exists(filesDirectory + "/" + request.Path.Replace("/files/", "")))
             {
                 response = new(HttpStatusCode.NotFound)
                 {
