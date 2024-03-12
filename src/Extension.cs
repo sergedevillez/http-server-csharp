@@ -55,11 +55,12 @@ public static class SocketExtensions
             byte[] fileContent = Encoding.UTF8.GetBytes(request.Content);
 
             //Save file
-            File.WriteAllBytes(filesDirectory + "/" + fileName, fileContent);
+            string filePath = filesDirectory + "/" + fileName;
+            File.WriteAllBytes(filePath, fileContent);
 
             response = new(HttpStatusCode.OK)
             {
-                Content = new StringContent("File created")
+                Content = new StringContent($"File created at {filePath}")
             };
         }
         else
@@ -106,6 +107,7 @@ public static class SocketExtensions
             {
                 Content = new StringContent(request.Path.Replace("/echo/", ""), Encoding.UTF8, "text/plain"),
             };
+            return response;
         }
 
         //GET /user-agent
