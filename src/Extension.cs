@@ -52,7 +52,8 @@ public static class SocketExtensions
         {
             //Get the file name from the path and the file from the request content
             string fileName = request.Path.Replace("/files/", "");
-            byte[] fileContent = Encoding.UTF8.GetBytes(request.Content);
+            string contentWithoutTrailingNulls = request.Content.TrimEnd('\0');
+            byte[] fileContent = Encoding.UTF8.GetBytes(contentWithoutTrailingNulls);
 
             //Save file
             string filePath = filesDirectory + "/" + fileName;
