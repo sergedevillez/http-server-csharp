@@ -58,7 +58,7 @@ public static class SocketExtensions
             string filePath = filesDirectory + "/" + fileName;
             File.WriteAllBytes(filePath, fileContent);
 
-            response = new(HttpStatusCode.OK)
+            response = new(HttpStatusCode.Created)
             {
                 Content = new StringContent($"File created at {filePath}")
             };
