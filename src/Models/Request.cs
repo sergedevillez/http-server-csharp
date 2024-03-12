@@ -8,6 +8,7 @@ public class Request
     public string Path { get; set; } = "";
     public string Version { get; set; } = "";
     public Dictionary<string, string> Headers { get; set; } = new();
+    public string Content { get; set; } = "";
 
     public static Request Parse(byte[] requestBytes)
     {
@@ -25,15 +26,23 @@ public class Request
             Version = startLine[2]
         };
 
-        foreach (string line in lines.Skip(1))
+
+        //Get the empty line index
+        int emptyLineIndex = Array.IndexOf(lines, "");
+        //Anything above the empty line is the header
+        for (int i = 1; i < emptyLineIndex; i++)
         {
-            string[] header = line.Split(": ");
+            string[] header = lines[i].Split(": ");
             if (header.Length == 2)
             {
                 request.Headers.Add(header[0], header[1]);
             }
         }
+        //Anything below the empty line is the content
+        if (emptyLineIndex < lines.Length - 1)
+        {
+            request.Content = lines[emptyLineIndex + 1];
+        }
         return request;
     }
-
 }

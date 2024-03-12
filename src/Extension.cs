@@ -27,11 +27,55 @@ public static class SocketExtensions
         await s.SendAsync(responseBytes, SocketFlags.None);
     }
 
-    public static HttpResponseMessage HandleRequest(this Socket socket, Request request, string? filesDirectory)
+    public static HttpResponseMessage HandleRequest(this Socket _, Request request, string? filesDirectory)
     {
         //Prepare response
-        HttpResponseMessage response;
-        //PATH "/"
+        HttpResponseMessage response = new();
+
+        //Check method
+        response = request.Method.ToLower() switch
+        {
+            "get" => HandleGetRequest(request, response, filesDirectory),
+            "post" => HandlePostRequest(request, response, filesDirectory),
+            _ => new(HttpStatusCode.MethodNotAllowed)
+            {
+                Content = new StringContent("Method not allowed")
+            },
+        };
+        return response;
+    }
+
+    private static HttpResponseMessage HandlePostRequest(Request request, HttpResponseMessage response, string? filesDirectory)
+    {
+        //POST /files/<filename>
+        if (request.Method.ToLower().Equals("post") && request.Path.Contains("/files/"))
+        {
+            //Get the file name from the path and the file from the request content
+            string fileName = request.Path.Replace("/files/", "");
+            byte[] fileContent = Encoding.UTF8.GetBytes(request.Content);
+
+            //Save file
+            File.WriteAllBytes(filesDirectory + "/" + fileName, fileContent);
+
+            response = new(HttpStatusCode.OK)
+            {
+                Content = new StringContent("File created")
+            };
+        }
+        else
+        {
+            Console.WriteLine("Path not found");
+            response = new(HttpStatusCode.NotFound)
+            {
+                Content = new StringContent("Path not found")
+            };
+        }
+        return response;
+    }
+
+    private static HttpResponseMessage HandleGetRequest(Request request, HttpResponseMessage response, string? filesDirectory)
+    {
+        //GET "/"
         if (request.Path.Equals("/"))
         {
             Console.WriteLine("Root path called");
@@ -40,18 +84,22 @@ public static class SocketExtensions
                 Content = new StringContent("You called the root path"),
                 StatusCode = HttpStatusCode.OK
             };
+            return response;
         }
-        //PATH "/index.html"
-        else if (request.Path.Equals("/index.html"))
+
+        //GET "/index.html"
+        if (request.Path.Equals("/index.html"))
         {
             Console.WriteLine("Index page called");
             response = new(HttpStatusCode.OK)
             {
                 Content = new StringContent("This is the index page")
             };
+            return response;
         }
-        //PATH "/echo/{message}"
-        else if (request.Path.Contains("/echo/"))
+
+        //GET "/echo/{message}"
+        if (request.Path.Contains("/echo/"))
         {
             Console.WriteLine("Echo called. Response was: " + request.Path.Replace("/echo/", ""));
             response = new(HttpStatusCode.OK)
@@ -59,18 +107,23 @@ public static class SocketExtensions
                 Content = new StringContent(request.Path.Replace("/echo/", ""), Encoding.UTF8, "text/plain"),
             };
         }
-        //PATH /user-agent
-        else if (request.Path.Equals("/user-agent"))
+
+        //GET /user-agent
+        if (request.Path.Equals("/user-agent"))
         {
-            Console.WriteLine("User agent called");
+            Console.WriteLine("Get user agent called");
             response = new(HttpStatusCode.OK)
             {
                 Content = new StringContent(request.Headers["User-Agent"]),
             };
+            return response;
         }
-        //PATH /files/<filename>
-        else if (request.Path.Contains("/files/"))
+
+        //GET /files/<filename>
+        if (request.Path.Contains("/files/"))
         {
+            Console.WriteLine("Get file called");
+
             if (!File.Exists(filesDirectory + "/" + request.Path.Replace("/files/", "")))
             {
                 response = new(HttpStatusCode.NotFound)
@@ -86,20 +139,17 @@ public static class SocketExtensions
                     Content = new StreamContent(File.OpenRead(filesDirectory + "/" + request.Path.Replace("/files/", "")))
                 };
             }
-        }
-        //PATH others
-        else
-        {
-            Console.WriteLine("Path not found");
-            response = new(HttpStatusCode.NotFound)
-            {
-                Content = new StringContent("Path not found")
-            };
+            return response;
         }
 
+        //others
+        Console.WriteLine("Path not found");
+        response = new(HttpStatusCode.NotFound)
+        {
+            Content = new StringContent("Path not found")
+        };
         return response;
     }
-
 
     public static async Task RespondAsync(this Socket s, HttpResponseMessage response)
     {
